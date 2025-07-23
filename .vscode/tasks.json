@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Lost and Found API Server",
+			"type": "shell",
+			"command": "C:\\Users\\hp\\OneDrive\\Desktop\\lost and found\\.venv\\Scripts\\uvicorn.exe",
+			"args": [
+				"backend.main:app",
+				"--host",
+				"0.0.0.0",
+				"--port",
+				"8000",
+				"--reload"
+			],
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
