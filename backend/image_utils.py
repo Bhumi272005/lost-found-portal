@@ -1,8 +1,9 @@
-import cv2
+from PIL import Image, ImageFilter, ImageStat
 import uuid
 import os
 import numpy as np
 from typing import List, Tuple
+import hashlib
 
 def save_image(file) -> str:
     # Create images directory if it doesn't exist
@@ -16,23 +17,45 @@ def save_image(file) -> str:
     return filepath
 
 def extract_features(image_path: str) -> np.ndarray:
-    """Extract ORB features from an image for similarity matching"""
+    """Extract simple color and texture features from an image for similarity matching"""
     try:
-        # Read image
-        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-        if img is None:
-            return np.array([])
+        # Open image with PIL
+        img = Image.open(image_path)
         
-        # Initialize ORB detector
-        orb = cv2.ORB_create(nfeatures=500)
+        # Convert to RGB if not already
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
         
-        # Find keypoints and descriptors
-        keypoints, descriptors = orb.detectAndCompute(img, None)
+        # Resize for consistent feature extraction
+        img = img.resize((64, 64))
         
-        if descriptors is not None:
-            return descriptors
-        else:
-            return np.array([])
+        # Extract color histogram features
+        # Get RGB histograms
+        r_hist = np.array(img.split()[0].histogram())
+        g_hist = np.array(img.split()[1].histogram())
+        b_hist = np.array(img.split()[2].histogram())
+        
+        # Normalize histograms
+        r_hist = r_hist / np.sum(r_hist)
+        g_hist = g_hist / np.sum(g_hist)
+        b_hist = b_hist / np.sum(b_hist)
+        
+        # Get basic statistics
+        stats = ImageStat.Stat(img)
+        mean_rgb = np.array(stats.mean)
+        std_rgb = np.array(stats.stddev)
+        
+        # Combine features
+        features = np.concatenate([
+            r_hist[:64],  # Reduced histogram bins
+            g_hist[:64],
+            b_hist[:64],
+            mean_rgb,
+            std_rgb
+        ])
+        
+        return features.astype(np.float32)
+        
     except Exception as e:
         print(f"Error extracting features from {image_path}: {e}")
         return np.array([])
@@ -47,32 +70,20 @@ def compare_images(img1_path: str, img2_path: str) -> float:
         if len(features1) == 0 or len(features2) == 0:
             return 0.0
         
-        # Use FLANN matcher
-        FLANN_INDEX_KDTREE = 1
-        index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
-        search_params = dict(checks=50)
-        flann = cv2.FlannBasedMatcher(index_params, search_params)
+        # Calculate cosine similarity
+        dot_product = np.dot(features1, features2)
+        norm1 = np.linalg.norm(features1)
+        norm2 = np.linalg.norm(features2)
         
-        # Convert to float32 for FLANN
-        features1 = features1.astype(np.float32)
-        features2 = features2.astype(np.float32)
-        
-        matches = flann.knnMatch(features1, features2, k=2)
-        
-        # Apply Lowe's ratio test
-        good_matches = []
-        for match_pair in matches:
-            if len(match_pair) == 2:
-                m, n = match_pair
-                if m.distance < 0.7 * n.distance:
-                    good_matches.append(m)
-        
-        # Calculate similarity score
-        if len(features1) > 0:
-            similarity = len(good_matches) / len(features1)
-            return min(similarity, 1.0)
-        else:
+        if norm1 == 0 or norm2 == 0:
             return 0.0
+        
+        cosine_similarity = dot_product / (norm1 * norm2)
+        
+        # Convert to 0-1 range (cosine similarity is -1 to 1)
+        similarity = (cosine_similarity + 1) / 2
+        
+        return max(0.0, min(1.0, similarity))
             
     except Exception as e:
         print(f"Error comparing images {img1_path} and {img2_path}: {e}")
