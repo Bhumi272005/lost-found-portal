@@ -54,11 +54,11 @@ is_admin = st.session_state.get("admin_authenticated", False)
 
 # Navigation options based on user role
 if is_admin:
-    page = st.sidebar.radio("📁 Navigate", ["🔍 Search Items", "📝 Report Item", "⚙️ Admin Panel"])
+    page = st.sidebar.radio("📁Navigate", ["🔍 Search Items", "📝 Report Item", "⚙️ Admin Panel"])
     # Add logout option in sidebar for admin
     # Add logout option in sidebar for admin
     st.sidebar.markdown("---")
-    if st.sidebar.button("🚪 Admin Logout"):
+    if st.sidebar.button("Admin Logout"):
         st.session_state.admin_authenticated = False
         st.success("✅ Logged out successfully!")
         st.rerun()
@@ -78,7 +78,7 @@ if st.session_state.get("show_admin_login", False):
     
     col1, col2 = st.columns([1, 1])
     with col1:
-        if st.button("🔓 Login", key="sidebar_login"):
+        if st.button("Login", key="sidebar_login"):
             if admin_password == "admin123":  # Change this to your preferred password
                 st.session_state.admin_authenticated = True
                 st.session_state.show_admin_login = False
@@ -227,7 +227,7 @@ elif page == "📝 Report Item":
 
     image_file = camera_image or file_image
 
-    if st.button("📤 Submit Report", type="primary"):
+    if st.button("Submit Report", type="primary"):
         if not contact:
             st.warning("⚠️ Contact is mandatory.")
         elif not image_file:
@@ -271,8 +271,8 @@ elif page == "⚙️ Admin Panel":
         st.error("🚫 Access Denied: Admin authentication required")
         st.stop()
     
-    st.success("👋 Welcome, Administrator!")
-    st.warning("🔐 Admin section - Use with caution.")
+    # st.success("👋 Welcome, Administrator!")
+    # st.warning("🔐 Admin section - Use with caution.")
     
     # Display all items with delete functionality
     try:
