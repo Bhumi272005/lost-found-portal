@@ -6,7 +6,27 @@ import datetime
 import pytz
 import os
 
-API_URL = "http://localhost:8000"
+# Get API URL from environment or use default
+API_URL = os.getenv("API_URL", "http://localhost:8000")
+
+def get_image_url(image_file_id):
+    """Convert GridFS file ID to API URL"""
+    if not image_file_id:
+        return None
+    
+    # Return the full URL to the image served by FastAPI from GridFS
+    return f"{API_URL}/images/{image_file_id}"
+
+def display_image(image_file_id, width=150):
+    """Display image using GridFS file ID or show placeholder"""
+    if image_file_id:
+        try:
+            image_url = get_image_url(image_file_id)
+            st.image(image_url, width=width)
+        except Exception as e:
+            st.write("📷 Image not found")
+    else:
+        st.write("📷 No image")
 
 st.set_page_config(page_title="Lost & Found Portal", layout="centered", page_icon="🔍")
 
@@ -20,13 +40,13 @@ def check_api_health():
         return False
 
 # --- Sidebar for Navigation ---
-st.sidebar.title("🔍 Lost & Found Portal")
+st.sidebar.title("Lost & Found Portal")
 
 # API Health Check
 if check_api_health():
-    st.sidebar.success("🟢 API Connected")
+    st.sidebar.success("API Connected")
 else:
-    st.sidebar.error("🔴 API Disconnected")
+    st.sidebar.error("API Disconnected")
     st.error("⚠️ Cannot connect to backend server. Please ensure the API server is running.")
 
 # Check if user is admin
@@ -86,7 +106,7 @@ if page == "🔍 Search Items":
 
     if st.button("🔍 Search"):
         if search_text.strip():
-            st.info(f"🔍 Searching for: '{search_text}'")
+            st.info(f"Searching for: '{search_text}'")
             try:
                 search_response = requests.get(f"{API_URL}/search/", params={"q": search_text, "status": status_filter})
                 if search_response.status_code == 200:
@@ -96,36 +116,26 @@ if page == "🔍 Search Items":
                     
                     # Display search results
                     for item in search_items:
-                        id, title, desc, category, loc, status, name, contact, img_path, timestamp = item
+                        id, title, desc, category, loc, status, name, contact, img_file_id, timestamp = item
                         
                         with st.container():
                             col1, col2 = st.columns([1, 3])
                             with col1:
-                                if img_path:
-                                    # Fix path to be relative to project root
-                                    full_img_path = os.path.join("..", img_path) if not os.path.isabs(img_path) else img_path
-                                    if os.path.exists(full_img_path):
-                                        st.image(full_img_path, width=150)
-                                    elif os.path.exists(img_path):
-                                        st.image(img_path, width=150)
-                                    else:
-                                        st.write("📷 Image not found")
-                                else:
-                                    st.write("📷 No image")
+                                display_image(img_file_id)
                             with col2:
-                                st.markdown(f"**📦 {title}** ({status})")
+                                st.markdown(f"** {title}** ({status})")
                                 st.markdown(f"**Description:** {desc}")
-                                st.markdown(f"**📍 Location:** {loc}")
-                                st.markdown(f"**👤 Reported by:** {name}")
-                                st.markdown(f"**📞 Contact:** `{contact}`")
-                                st.markdown(f"**🕐 Date:** {timestamp}")
+                                st.markdown(f"**Location:** {loc}")
+                                st.markdown(f"**Reported by:** {name}")
+                                st.markdown(f"**Contact:** `{contact}`")
+                                st.markdown(f"**Date:** {timestamp}")
                         st.markdown("---")
                 else:
                     st.error("❌ Search failed")
             except Exception as e:
                 st.error(f"❌ Search error: {e}")
         elif uploaded_image:
-            st.info("🔍 Searching for visually similar items...")
+            st.info("Searching for visually similar items...")
             try:
                 files = {"file": (uploaded_image.name, uploaded_image.getvalue(), uploaded_image.type)}
                 visual_response = requests.post(f"{API_URL}/search/visual/", files=files)
@@ -138,34 +148,24 @@ if page == "🔍 Search Items":
                     # Display visual search results
                     for item in visual_items:
                         if len(item) > 10:  # Has similarity score
-                            id, title, desc, category, loc, status, name, contact, img_path, timestamp, similarity = item
+                            id, title, desc, category, loc, status, name, contact, img_file_id, timestamp, similarity = item
                             similarity_percent = round(similarity * 100, 1)
                         else:
-                            id, title, desc, category, loc, status, name, contact, img_path, timestamp = item
+                            id, title, desc, category, loc, status, name, contact, img_file_id, timestamp = item
                             similarity_percent = 0
                         
                         with st.container():
                             col1, col2 = st.columns([1, 3])
                             with col1:
-                                if img_path:
-                                    # Fix path to be relative to project root
-                                    full_img_path = os.path.join("..", img_path) if not os.path.isabs(img_path) else img_path
-                                    if os.path.exists(full_img_path):
-                                        st.image(full_img_path, width=150)
-                                    elif os.path.exists(img_path):
-                                        st.image(img_path, width=150)
-                                    else:
-                                        st.write("📷 Image not found")
-                                else:
-                                    st.write("📷 No image")
+                                display_image(img_file_id)
                             with col2:
-                                st.markdown(f"**📦 {title}** ({status})")
-                                st.markdown(f"**🎯 Similarity:** {similarity_percent}%")
+                                st.markdown(f"**{title}** ({status})")
+                                st.markdown(f"**Similarity:** {similarity_percent}%")
                                 st.markdown(f"**Description:** {desc}")
-                                st.markdown(f"**📍 Location:** {loc}")
-                                st.markdown(f"**👤 Reported by:** {name}")
-                                st.markdown(f"**📞 Contact:** `{contact}`")
-                                st.markdown(f"**🕐 Date:** {timestamp}")
+                                st.markdown(f"**Location:** {loc}")
+                                st.markdown(f"**Reported by:** {name}")
+                                st.markdown(f"**Contact:** `{contact}`")
+                                st.markdown(f"**Date:** {timestamp}")
                         st.markdown("---")
                 else:
                     st.error("❌ Visual search failed")
@@ -184,31 +184,21 @@ if page == "🔍 Search Items":
 
         if items:
             for item in items:
-                id, title, desc, category, loc, status, name, contact, img_path, timestamp = item
+                id, title, desc, category, loc, status, name, contact, img_file_id, timestamp = item
                 if status_filter != "All" and status != status_filter:
                     continue
 
                 with st.container():
                     col1, col2 = st.columns([1, 3])
                     with col1:
-                        if img_path:
-                            # Fix path to be relative to project root
-                            full_img_path = os.path.join("..", img_path) if not os.path.isabs(img_path) else img_path
-                            if os.path.exists(full_img_path):
-                                st.image(full_img_path, width=150)
-                            elif os.path.exists(img_path):
-                                st.image(img_path, width=150)
-                            else:
-                                st.write("📷 Image not found")
-                        else:
-                            st.write("📷 No image")
+                        display_image(img_file_id)
                     with col2:
-                        st.markdown(f"**📦 {title}** ({status})")
+                        st.markdown(f"**{title}** ({status})")
                         st.markdown(f"**Description:** {desc}")
-                        st.markdown(f"**📍 Location:** {loc}")
-                        st.markdown(f"**👤 Reported by:** {name}")
-                        st.markdown(f"**📞 Contact:** `{contact}`")
-                        st.markdown(f"**🕐 Date:** {timestamp}")
+                        st.markdown(f"**Location:** {loc}")
+                        st.markdown(f"**Reported by:** {name}")
+                        st.markdown(f"**Contact:** `{contact}`")
+                        st.markdown(f"**Date:** {timestamp}")
                 st.markdown("---")
         else:
             st.info("📭 No items reported yet. Be the first to report a lost or found item!")
@@ -299,16 +289,16 @@ elif page == "⚙️ Admin Panel":
         with col1:
             st.metric("📊 Total Items", len(items))
         with col2:
-            st.metric("❌ Lost Items", len(lost_items))
+            st.metric("Lost Items", len(lost_items))
         with col3:
-            st.metric("✅ Found Items", len(found_items))
+            st.metric("Found Items", len(found_items))
         
         st.markdown("---")
         
         if items:
             st.subheader("🗂️ All Items Management")
             for item in items:
-                id, title, desc, category, loc, status, name, contact, img_path, timestamp = item
+                id, title, desc, category, loc, status, name, contact, img_file_id, timestamp = item
                 
                 # Status indicator
                 # Status indicator
@@ -319,29 +309,26 @@ elif page == "⚙️ Admin Panel":
                     
                     with col1:
                         # Item details
-                        if img_path:
-                            # Fix path to be relative to project root
-                            full_img_path = os.path.join("..", img_path) if not os.path.isabs(img_path) else img_path
-                            if os.path.exists(full_img_path):
-                                st.image(full_img_path, width=200, caption=f"Item: {title}")
-                            elif os.path.exists(img_path):
-                                st.image(img_path, width=200, caption=f"Item: {title}")
-                            else:
-                                st.info("📷 Image file not found")
+                        if img_file_id:
+                            try:
+                                image_url = get_image_url(img_file_id)
+                                st.image(image_url, width=200, caption=f"Item: {title}")
+                            except:
+                                st.info("📷 Image not accessible")
                         else:
                             st.info("📷 No image available")
                         
-                        st.markdown(f"**📝 Description:** {desc}")
-                        st.markdown(f"**📍 Location:** {loc}")
-                        st.markdown(f"**👤 Reported by:** {name}")
-                        st.markdown(f"**📞 Contact:** `{contact}`")
-                        st.markdown(f"**🕐 Timestamp:** {timestamp}")
-                        st.markdown(f"**🏷️ Category:** {category}")
+                        st.markdown(f"**Description:** {desc}")
+                        st.markdown(f"**Location:** {loc}")
+                        st.markdown(f"**Reported by:** {name}")
+                        st.markdown(f"**Contact:** `{contact}`")
+                        st.markdown(f"**Timestamp:** {timestamp}")
+                        st.markdown(f"**Category:** {category}")
                     
                     with col2:
                         st.markdown("**⚙️ Actions**")
                         # Delete button for admin with confirmation
-                        if st.button(f"🗑️ Delete Item", key=f"delete_{id}", type="secondary"):
+                        if st.button(f"Delete Item", key=f"delete_{id}", type="secondary"):
                             # Add a confirmation step
                             st.session_state[f"confirm_delete_{id}"] = True
                         
@@ -350,7 +337,7 @@ elif page == "⚙️ Admin Panel":
                             st.warning("⚠️ Are you sure?")
                             col_yes, col_no = st.columns(2)
                             with col_yes:
-                                if st.button("✅ Yes", key=f"confirm_yes_{id}"):
+                                if st.button("Yes", key=f"confirm_yes_{id}"):
                                     try:
                                         del_response = requests.delete(f"{API_URL}/items/{id}")
                                         if del_response.status_code == 200:
@@ -360,11 +347,11 @@ elif page == "⚙️ Admin Panel":
                                                 del st.session_state[f"confirm_delete_{id}"]
                                             st.rerun()
                                         else:
-                                            st.error(f"❌ Error: {del_response.text}")
+                                            st.error(f"Error: {del_response.text}")
                                     except Exception as e:
-                                        st.error(f"❌ Failed to delete: {e}")
+                                        st.error(f"Failed to delete: {e}")
                             with col_no:
-                                if st.button("❌ No", key=f"confirm_no_{id}"):
+                                if st.button("No", key=f"confirm_no_{id}"):
                                     # Clean up session state
                                     if f"confirm_delete_{id}" in st.session_state:
                                         del st.session_state[f"confirm_delete_{id}"]
@@ -374,9 +361,9 @@ elif page == "⚙️ Admin Panel":
             st.markdown("*Items will appear here once users start reporting lost/found items.*")
             
     except Exception as e:
-        st.error(f"❌ Error fetching items: {e}")
-        st.info("💡 Make sure the backend API server is running.")
+        st.error(f"Error fetching items: {e}")
+        st.info("Make sure the backend API server is running.")
 
 # Footer
 st.markdown("---")
-st.markdown("*Lost & Found Portal - Connecting people with their belongings* 🔍")
+st.markdown("*Lost & Found Portal - Connecting people with their belongings* ")

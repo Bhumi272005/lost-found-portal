@@ -13,8 +13,11 @@ env/
 # Environment variables
 .env
 
-# Database files (keep only in backend/)
-/database.db
+# Database files (SQLite - not used anymore)
+*.db
+*.sqlite
+*.sqlite3
+database.db
 
 # IDE files
 .vscode/settings.json

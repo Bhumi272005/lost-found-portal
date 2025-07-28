@@ -24,21 +24,22 @@ def classify_image(path: str) -> str:
         # Use gemini-1.5-flash model (updated model name)
         model = genai.GenerativeModel('gemini-1.5-flash')
         
-        # Open and process the image
-        image = Image.open(path)
-        
-        # Generate content with the image and prompt
-        response = model.generate_content([
-            image, 
-            "What object is in this image? Respond with a one-word category."
-        ])
+        # Open and process the image with proper context management
+        with Image.open(path) as image:
+            # Generate content with the image and prompt
+            response = model.generate_content([
+                image, 
+                "What object is in this image? Respond with a one-word category."
+            ])
         
         return response.text.strip()
         
     except FileNotFoundError as e:
-        return f"Error: {str(e)}"
+        print(f"Gemini API: File not found - {str(e)}")
+        return "Uncategorized"
     except Exception as e:
-        return f"Error processing image: {str(e)}"
+        print(f"Gemini API error: {str(e)}")
+        return "Uncategorized"
 
 # Test function
 if __name__ == "__main__":

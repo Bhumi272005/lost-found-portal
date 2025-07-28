@@ -1,116 +1,109 @@
-# Lost & Found Portal - Complete Application Guide
+# Lost & Found Portal
 
-## Overview
-This is a complete Lost & Found portal with a FastAPI backend and Streamlit frontend, featuring:
+A web-based Lost & Found portal with FastAPI backend and Streamlit frontend, powered by **MongoDB with GridFS** for cross-computer image sharing.
+
+## 🎯 Key Features
+
 - 📝 Report lost/found items with image upload
-- 🔍 Search functionality with text queries
+- 🔍 Search functionality with text search
 - 🏷️ AI-powered image classification using Google Gemini
 - ⚙️ Admin panel for item management
-- 🕐 Indian Standard Time (IST) timestamps in 24-hour format
+- 🌐 **Multi-computer access** - Images stored in MongoDB GridFS
 - 📱 Mobile-friendly interface
+- 🖼️ **Shared image storage** - All computers can see the same images
 
-## Features
+## Prerequisites
 
-### 🔧 Backend (FastAPI)
-- **REST API** with proper error handling
-- **Database**: SQLite with IST timestamp support
-- **Image Processing**: Automatic category detection using Google Gemini AI
-- **File Upload**: Secure image handling with validation
-- **Search**: Text-based search across title, description, and category
-- **Admin Functions**: Delete items by ID
+**MongoDB is required** - Choose one option:
 
-### 🎨 Frontend (Streamlit)
-- **Three-page interface**: Search, Report, Admin
-- **Real-time API health monitoring**
-- **Image upload via camera or file picker**
-- **Responsive design with status indicators**
-- **Auto-refresh after operations**
+### Option 1: Local MongoDB
+1. Install MongoDB Community Edition from https://www.mongodb.com/try/download/community
+2. Create data directory: `mkdir data\db`
+3. Start MongoDB: `mongod --dbpath data\db`
 
-## Setup Instructions
+### Option 2: MongoDB Atlas (Cloud - Recommended)
+1. Create free account at https://cloud.mongodb.com/
+2. Create cluster and get connection string
+3. Update `.env` file with your connection string
 
-### 1. Backend Setup
+## Quick Start
+
+### 1. Install Dependencies
 ```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Set up Gemini API (optional)
-# Get API key from: https://makersuite.google.com/app/apikey
-set GEMINI_API_KEY=your_actual_api_key
-
-# Start the API server
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+.venv\Scripts\pip.exe install -r requirements.txt
 ```
 
-### 2. Frontend Setup
-```bash
-# Run the frontend
-streamlit run frontend/app.py
-# OR
-python run_frontend.py
+### 2. Setup Environment
+Update `.env` file:
+```
+MONGO_URL=mongodb://localhost:27017/  # or your Atlas connection string
+DATABASE_NAME=lost_and_found
+GEMINI_API_KEY=your_api_key_here      # Optional
 ```
 
-### 3. Access the Application
-- **Frontend**: http://localhost:8501
-- **API Docs**: http://localhost:8000/docs
-- **API Health**: http://localhost:8000/health
+### 3. Test MongoDB Connection
+```bash
+.venv\Scripts\python.exe setup_mongodb.py
+```
 
-### 4. Admin Access (For You)
-- **Admin Password**: `admin123`
-- **How to Login**: Click "🔐 Admin Login" in the sidebar
-- **Admin Features**: Full access to Admin Panel with item management
+### 4. Start Application
 
-## Quick Start Guide
+**Option A - Use VS Code Task (Recommended):**
+- Press `Ctrl+Shift+P`
+- Run "Tasks: Run Task"
+- Select "Start Lost and Found API Server"
+- Open http://localhost:8501 for frontend
 
-### For Admin (You):
-1. **Start Backend**: The API server should be running on port 8000
-2. **Start Frontend**: Run `python start_frontend.py` or `streamlit run frontend/app.py`
-3. **Access Admin Panel**: 
-   - Open http://localhost:8501
-   - Click "🔐 Admin Login" in sidebar
-   - Enter password: `admin123`
-   - Access all three pages including Admin Dashboard
+**Option B - Manual Start:**
+```bash
+# Terminal 1 - Backend
+.venv\Scripts\uvicorn.exe backend.main:app --host 0.0.0.0 --port 8000 --reload
 
-### For Regular Users:
-- Can access "🔍 Search Items" and "📝 Report Item" without authentication
-- Cannot see or access Admin Panel
+# Terminal 2 - Frontend  
+.venv\Scripts\streamlit.exe run frontend\app.py
+```
 
-## API Endpoints
+**Option C - Simple Script:**
+```bash
+.venv\Scripts\python.exe run.py
+```
+Frontend runs on: http://localhost:8501
 
-### Core Endpoints
-- `GET /` - API status
-- `GET /health` - Health check
-- `GET /items/` - Fetch all items
-- `GET /search/?q={query}&status={status}` - Search items
-- `POST /report/` - Submit new item (multipart form)
-- `DELETE /items/{id}` - Delete item by ID
+## Configuration
 
-### Search Parameters
-- `q`: Search query (searches title, description, category)
-- `status`: Filter by "Lost", "Found", or "All"
+Copy `.env.example` to `.env` and configure:
 
-## Key Features
+### For Local MongoDB:
+```
+MONGO_URL=mongodb://localhost:27017/
+DATABASE_NAME=lost_and_found
+```
 
-### 🔍 Search Functionality
-- **Text Search**: Searches across item title, description, and category
-- **Status Filter**: Filter by Lost/Found items
-- **Real-time Results**: Instant search with result count
+### For MongoDB Atlas:
+```
+MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/
+DATABASE_NAME=lost_and_found
+```
 
-### 📝 Item Reporting
-- **Dual Image Input**: Camera capture or file upload
-- **AI Classification**: Automatic category detection using Google Gemini
-- **Validation**: Required fields with proper error handling
-- **Success Feedback**: Confirmation with auto-detected category display
+## Network Access
 
-### ⚙️ Admin Panel
-- **Item Management**: View all items with full details
-- **Delete Functionality**: Remove items with confirmation
-- **Statistics**: Total item count display
-- **Expandable Cards**: Clean, organized item display
+To access from other computers:
+1. Find your IP: `ipconfig`
+2. Allow port 8000 in Windows Firewall
+3. Access via: `http://YOUR_IP:8000`
 
-### 🕐 Timestamp Handling
-- **IST Timezone**: All timestamps in Indian Standard Time
-- **24-hour Format**: DD-MM-YYYY HH:MM:SS IST format
-- **Auto-generated**: Timestamps created on item submission
+## Project Structure
+```
+├── backend/           # FastAPI backend
+│   ├── main.py       # API server
+│   ├── mongodb.py    # MongoDB database
+│   └── ...
+├── frontend/         # Streamlit frontend
+│   └── app.py        # Web interface
+├── images/           # Uploaded images
+├── setup_mongodb.py  # MongoDB setup helper
+└── requirements.txt  # Dependencies
+```
 
 ## Project Structure
 ```
