@@ -1,12 +1,60 @@
+# Core Backend Dependencies
 fastapi==0.104.1
-uvicorn==0.24.0
+uvicorn[standard]==0.24.0
 python-multipart==0.0.6
-pillow==10.1.0
-google-generativeai==0.3.2
 pydantic==2.5.0
-python-dotenv==1.0.0
-streamlit==1.28.1
-requests==2.31.0
-pytz==2023.3
+
+# Database Dependencies
 pymongo==4.6.0
 motor==3.3.2
+
+# Image Processing Dependencies
+pillow==10.1.0
+
+# AI/ML Dependencies
+google-generativeai==0.3.2
+
+# Frontend Dependencies
+streamlit==1.28.1
+
+# HTTP and API Dependencies
+requests==2.31.0
+httpx==0.25.2
+
+# Environment and Configuration
+python-dotenv==1.0.0
+
+# Time and Date Dependencies
+pytz==2023.3
+
+# Additional Dependencies for Deployment
+gunicorn==21.2.0
+bson==0.5.10
+
+# Development and Testing Dependencies (Optional)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Security Dependencies
+cryptography==41.0.7
+
+# File Handling Dependencies
+aiofiles==23.2.1
+
+# CORS and Middleware Dependencies
+python-jose[cryptography]==3.3.0
+
+# Additional Streamlit Dependencies
+altair==5.1.2
+toml==0.10.2
+watchdog==3.0.0
+
+# Image and Media Processing
+opencv-python-headless==4.8.1.78
+numpy==1.24.4
+
+# Network and Socket Dependencies
+websockets==12.0
+
+# Logging and Monitoring
+loguru==0.7.2

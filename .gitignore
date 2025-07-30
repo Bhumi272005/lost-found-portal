@@ -34,6 +34,14 @@ Thumbs.db
 *.tmp
 *.temp
 
+# Deployment files (keep templates, ignore actual config)
+.env.production
+.env.local
+secrets.toml
+
+# Streamlit specific
+.streamlit/secrets.toml
+
 # Images uploaded by users (optional - you might want to keep these)
 # images/*.jpg
 # images/*.png
