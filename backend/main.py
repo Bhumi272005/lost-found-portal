@@ -216,6 +216,51 @@ def cleanup_temp_files_endpoint():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during cleanup: {str(e)}")
 
+@app.get("/api/items-with-urls")
+def get_items_with_urls():
+    """Get all items with shareable image URLs"""
+    try:
+        items = db.fetch_all_items_with_urls()
+        return {"items": items, "count": len(items)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching items: {str(e)}")
+
+@app.post("/api/search-by-image-url")
+def search_by_image_url(request: dict):
+    """Search for similar items using image URL"""
+    try:
+        image_url = request.get("image_url")
+        if not image_url:
+            raise HTTPException(status_code=400, detail="image_url is required")
+        
+        results = db.search_by_image_url(image_url)
+        return {
+            "message": "Image search completed",
+            "results": results,
+            "count": len(results),
+            "query_url": image_url
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in image search: {str(e)}")
+
+@app.get("/api/classify-image")
+def classify_image_endpoint(image_url: str):
+    """Classify an image from URL using Gemini AI"""
+    try:
+        from backend.gemini_api import classify_image_from_url
+        
+        if not image_url:
+            raise HTTPException(status_code=400, detail="image_url parameter is required")
+        
+        category = classify_image_from_url(image_url)
+        return {
+            "image_url": image_url,
+            "category": category,
+            "success": True
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error classifying image: {str(e)}")
+
 
 if __name__ == "__main__":
     import uvicorn

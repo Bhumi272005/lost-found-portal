@@ -20,6 +20,7 @@ class MongoDB:
         self.db = None
         self.collection = None
         self.fs = None  # GridFS for image storage
+        self.base_url = os.getenv("BASE_URL", "http://localhost:8000")  # Configurable base URL
         self.connect()
     
     def connect(self):
@@ -89,22 +90,44 @@ class MongoDB:
             print(f"Error deleting image from GridFS: {e}")
             return False
     
+    def generate_image_url(self, file_id: str) -> str:
+        """Generate shareable URL for image"""
+        if not file_id:
+            return None
+        return f"{self.base_url}/images/{file_id}"
+    
     def insert_item(self, item, image_data: bytes = None, image_filename: str = None) -> str:
-        """Insert a new item into the database with image stored in GridFS"""
+        """Insert a new item into the database with image stored in GridFS and AI classification"""
         try:
             image_file_id = None
+            ai_category = None
+            image_url = None
+            
             if image_data and image_filename:
+                # Store image in GridFS
                 image_file_id = self.store_image(image_data, image_filename)
+                image_url = self.generate_image_url(image_file_id)
+                
+                # Use Gemini API to classify the image
+                try:
+                    from backend.gemini_api import classify_image_from_bytes
+                    ai_category = classify_image_from_bytes(image_data)
+                    print(f"AI classified image as: {ai_category}")
+                except Exception as e:
+                    print(f"AI classification failed: {e}")
+                    ai_category = "Uncategorized"
             
             document = {
                 "title": item.title,
                 "description": item.description,
                 "category": item.category,
+                "ai_category": ai_category,  # Store AI classification
                 "location": item.location,
                 "status": item.status,
                 "name": item.name,
                 "contact": item.contact,
                 "image_file_id": image_file_id,  # Store GridFS file ID instead of path
+                "image_url": image_url,  # Store shareable URL
                 "timestamp": self.get_ist_timestamp()
             }
             
@@ -202,6 +225,95 @@ class MongoDB:
         except Exception as e:
             print(f"Error getting item by ID: {e}")
             return None
+    
+    def fetch_all_items_with_urls(self) -> List[Dict]:
+        """Fetch all items with image URLs instead of tuples"""
+        try:
+            cursor = self.collection.find().sort("timestamp", -1)
+            items = []
+            
+            for doc in cursor:
+                item_dict = {
+                    "id": str(doc["_id"]),
+                    "title": doc.get("title", ""),
+                    "description": doc.get("description", ""),
+                    "category": doc.get("category", ""),
+                    "ai_category": doc.get("ai_category", ""),
+                    "location": doc.get("location", ""),
+                    "status": doc.get("status", ""),
+                    "name": doc.get("name", ""),
+                    "contact": doc.get("contact", ""),
+                    "image_file_id": doc.get("image_file_id", ""),
+                    "image_url": self.generate_image_url(doc.get("image_file_id")),
+                    "timestamp": self.format_ist_timestamp(doc.get("timestamp", ""))
+                }
+                items.append(item_dict)
+            
+            return items
+        except Exception as e:
+            print(f"Error fetching items: {e}")
+            return []
+    
+    def search_by_image_url(self, image_url: str) -> List[Dict]:
+        """Search for similar items using image URL and AI classification"""
+        try:
+            from backend.gemini_api import classify_image_from_url
+            
+            # Classify the search image
+            search_category = classify_image_from_url(image_url)
+            print(f"Search image classified as: {search_category}")
+            
+            # Search for items with similar AI categories
+            search_filter = {
+                "$or": [
+                    {"ai_category": {"$regex": search_category, "$options": "i"}},
+                    {"category": {"$regex": search_category, "$options": "i"}},
+                    {"title": {"$regex": search_category, "$options": "i"}},
+                    {"description": {"$regex": search_category, "$options": "i"}}
+                ]
+            }
+            
+            cursor = self.collection.find(search_filter).sort("timestamp", -1)
+            items = []
+            
+            for doc in cursor:
+                item_dict = {
+                    "id": str(doc["_id"]),
+                    "title": doc.get("title", ""),
+                    "description": doc.get("description", ""),
+                    "category": doc.get("category", ""),
+                    "ai_category": doc.get("ai_category", ""),
+                    "location": doc.get("location", ""),
+                    "status": doc.get("status", ""),
+                    "name": doc.get("name", ""),
+                    "contact": doc.get("contact", ""),
+                    "image_file_id": doc.get("image_file_id", ""),
+                    "image_url": self.generate_image_url(doc.get("image_file_id")),
+                    "timestamp": self.format_ist_timestamp(doc.get("timestamp", ""))
+                }
+                items.append(item_dict)
+            
+            return items
+        except Exception as e:
+            print(f"Error in image search: {e}")
+            return []
+
+    def list_all_images(self) -> List[Dict]:
+        """List all images stored in GridFS with metadata"""
+        try:
+            files = []
+            for grid_file in self.fs.find():
+                files.append({
+                    'file_id': str(grid_file._id),
+                    'filename': grid_file.filename,
+                    'upload_date': grid_file.upload_date,
+                    'length': grid_file.length,
+                    'content_type': getattr(grid_file, 'contentType', 'image/jpeg')
+                })
+            return files
+        except Exception as e:
+            print(f"Error listing images: {e}")
+            return []
 
 # Global MongoDB instance
 mongodb_instance = None
@@ -245,3 +357,15 @@ def get_image(file_id):
 def store_image(image_data, filename):
     """Store image in GridFS"""
     return get_mongodb().store_image(image_data, filename)
+
+def fetch_all_items_with_urls():
+    """Fetch all items with URLs using MongoDB"""
+    return get_mongodb().fetch_all_items_with_urls()
+
+def search_by_image_url(image_url):
+    """Search items by image URL using MongoDB"""
+    return get_mongodb().search_by_image_url(image_url)
+
+def list_all_images():
+    """List all images using MongoDB"""
+    return get_mongodb().list_all_images()
