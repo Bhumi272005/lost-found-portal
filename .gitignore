@@ -40,6 +40,7 @@ Thumbs.db
 secrets.toml
 
 # Streamlit specific
+.streamlit/
 .streamlit/secrets.toml
 
 # Images uploaded by users (optional - you might want to keep these)

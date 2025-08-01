@@ -20,7 +20,7 @@ class MongoDB:
         self.db = None
         self.collection = None
         self.fs = None  # GridFS for image storage
-        self.base_url = os.getenv("BASE_URL", "http://localhost:8000")  # Configurable base URL
+        self.base_url = os.getenv("BASE_URL", "http://192.168.0.102:8000")  # Configurable base URL for network access
         self.connect()
     
     def connect(self):
