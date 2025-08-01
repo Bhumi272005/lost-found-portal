@@ -25,20 +25,25 @@ class MongoDB:
         self.connect()
     
     def connect(self):
-        """Connect to MongoDB"""
+        """Connect to MongoDB with improved error handling"""
         try:
-            self.client = MongoClient(MONGO_URL)
+            self.client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000)
             self.db = self.client[DATABASE_NAME]
             self.collection = self.db[COLLECTION_NAME]
             self.fs = gridfs.GridFS(self.db)  # Initialize GridFS
-            # Test the connection
+            # Test the connection with timeout
             self.client.admin.command('ping')
             print(f"✅ Connected to MongoDB at {MONGO_URL}")
             print("✅ GridFS initialized for image storage")
         except Exception as e:
             print(f"❌ Failed to connect to MongoDB: {e}")
             print("💡 Make sure MongoDB is running or use MongoDB Atlas cloud service")
-            raise e
+            print("⚠️  API will start but database operations will fail until connection is established")
+            # Don't raise the exception - let the app start without DB connection
+            self.client = None
+            self.db = None
+            self.collection = None
+            self.fs = None
     
     def get_ist_timestamp(self):
         """Get current timestamp in Indian Standard Time"""

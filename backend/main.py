@@ -7,6 +7,7 @@ import sys
 import io
 import tempfile
 import contextlib
+from datetime import datetime
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -197,7 +198,35 @@ def read_root():
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy", "database": "MongoDB", "storage": "GridFS"}
+    """Health check endpoint that doesn't require database connection"""
+    try:
+        # Basic health check without database dependency
+        return {
+            "status": "healthy", 
+            "service": "Lost and Found API",
+            "version": "1.0.0",
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Service unhealthy: {str(e)}")
+
+@app.get("/health/full")
+def full_health_check():
+    """Comprehensive health check including database connectivity"""
+    try:
+        # Test database connection
+        db.client.admin.command('ping')
+        database_status = "connected"
+    except Exception as e:
+        database_status = f"error: {str(e)}"
+    
+    return {
+        "status": "healthy" if database_status == "connected" else "degraded",
+        "database": database_status,
+        "storage": "GridFS",
+        "service": "Lost and Found API",
+        "timestamp": datetime.now().isoformat()
+    }
 
 
 @app.delete("/items/{item_id}")
