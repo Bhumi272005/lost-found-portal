@@ -30,6 +30,11 @@ except ImportError:
 
 app = FastAPI(title="Lost and Found API", version="1.0.0")
 
+# Ultra-simple health endpoint that Railway can definitely reach
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 # Add startup event
 @app.on_event("startup")
 async def startup_event():
@@ -53,8 +58,8 @@ def cleanup_temp_files():
     except Exception as e:
         print(f"Error during temp file cleanup: {e}")
 
-# Cleanup temp files on startup
-cleanup_temp_files()
+# Skip cleanup on startup to speed up Railway deployment
+# cleanup_temp_files()
 
 @contextlib.contextmanager
 def temporary_image_file(image_data: bytes, file_id: str):
@@ -86,14 +91,8 @@ def temporary_image_file(image_data: bytes, file_id: str):
 # Remove static files mount since we're using GridFS
 # Images will be served through API endpoints
 
-# Initialize MongoDB database (non-blocking)
-try:
-    db.init_db()
-    print("✅ MongoDB initialized successfully")
-except Exception as e:
-    print(f"⚠️ MongoDB initialization warning: {e}")
-    print("💡 App will start without database - configure MongoDB Atlas or local MongoDB")
-    # Don't raise exception - let app start without database
+# Initialize MongoDB database (non-blocking) - moved after middleware
+# to prevent startup delays
 
 app.add_middleware(
     CORSMiddleware,
@@ -102,6 +101,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Move MongoDB initialization after middleware setup
+try:
+    db.init_db()
+    print("✅ MongoDB initialized successfully")
+except Exception as e:
+    print(f"⚠️ MongoDB initialization warning: {e}")
+    print("💡 App will start without database - configure MongoDB Atlas or local MongoDB")
+    # Don't raise exception - let app start without database
 
 @app.post("/report/")
 async def report_item(
@@ -231,9 +239,9 @@ def ping():
     """Simple ping endpoint for Railway health checks"""
     return {"status": "ok", "message": "pong"}
 
-@app.get("/health")
-def health_check():
-    """Health check endpoint that doesn't require database connection"""
+@app.get("/health/detailed")
+def health_check_detailed():
+    """Detailed health check endpoint"""
     try:
         import time
         # Basic health check without database dependency
