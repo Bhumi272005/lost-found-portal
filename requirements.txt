@@ -1,45 +1,30 @@
 # Lost & Found Portal - Dependencies
 # Python 3.8+ required
 
-# Core Web Framework
+# Core Web Framework & ASGI Server
 fastapi>=0.104.1,<0.110.0
 uvicorn[standard]>=0.24.0,<0.30.0
 python-multipart>=0.0.6,<1.0.0
 
-# Database & Storage
+# Database & GridFS Storage
 pymongo>=4.6.0,<5.0.0
-motor>=3.3.2,<4.0.0
-gridfs>=4.6.0
 
 # AI & Machine Learning
 google-generativeai>=0.3.2,<1.0.0
+
+# Image Processing
 pillow>=10.1.0,<11.0.0
 numpy>=1.24.3,<2.0.0
 
-# Data Validation & Serialization
+# Data Validation & Models
 pydantic>=2.5.0,<3.0.0
-pydantic-settings>=2.0.0,<3.0.0
 
 # Environment & Configuration
 python-dotenv>=1.0.0,<2.0.0
 pytz>=2023.3
 
-# Frontend & HTTP Client
+# Frontend Framework
 streamlit>=1.28.1,<2.0.0
+
+# HTTP Client
 requests>=2.31.0,<3.0.0
-
-# Development & Production
-gunicorn>=21.2.0,<22.0.0
-python-json-logger>=2.0.7,<3.0.0
-
-# Security & CORS
-python-jose[cryptography]>=3.3.0,<4.0.0
-passlib[bcrypt]>=1.7.4,<2.0.0
-
-# Type Hints & Utilities
-typing-extensions>=4.8.0,<5.0.0
-email-validator>=2.1.0,<3.0.0
-
-# Image Processing Utilities
-opencv-python-headless>=4.8.0,<5.0.0
-scikit-image>=0.21.0,<1.0.0
