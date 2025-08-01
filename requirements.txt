@@ -1,30 +1,20 @@
-# Lost & Found Portal - Dependencies
-# Python 3.8+ required
+# Lost & Found Portal - Streamlit Frontend Dependencies
+# Optimized for Streamlit Cloud deployment
 
-# Core Web Framework & ASGI Server
-fastapi>=0.104.1,<0.110.0
-uvicorn[standard]>=0.24.0,<0.30.0
-python-multipart>=0.0.6,<1.0.0
+# Frontend Framework (Primary)
+streamlit>=1.28.1
 
-# Database & GridFS Storage
-pymongo>=4.6.0,<5.0.0
-
-# AI & Machine Learning
-google-generativeai>=0.3.2,<1.0.0
+# HTTP Client for API calls
+requests>=2.31.0
 
 # Image Processing
-pillow>=10.1.0,<11.0.0
-numpy>=1.24.3,<2.0.0
+pillow>=9.0.0
 
-# Data Validation & Models
-pydantic>=2.5.0,<3.0.0
-
-# Environment & Configuration
-python-dotenv>=1.0.0,<2.0.0
+# Date/Time handling
 pytz>=2023.3
 
-# Frontend Framework
-streamlit>=1.28.1,<2.0.0
+# Environment Configuration
+python-dotenv>=1.0.0
 
-# HTTP Client
-requests>=2.31.0,<3.0.0
+# Data handling
+numpy>=1.21.0
