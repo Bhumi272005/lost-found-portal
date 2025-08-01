@@ -1,26 +1,18 @@
-# Use Python 3.11 slim image
+# Railway-optimized Dockerfile
 FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies including curl for healthchecks
-RUN apt-get update && apt-get install -y \
-    gcc \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements file first for better caching
+# Copy requirements and install dependencies
 COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy source code
 COPY . .
 
-# Expose the port that Railway will use
-EXPOSE 8000
+# Railway will set the PORT environment variable
+EXPOSE $PORT
 
-# Use exec form for CMD to ensure proper signal handling
-CMD ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start the application
+CMD uvicorn backend.main:app --host 0.0.0.0 --port $PORT
