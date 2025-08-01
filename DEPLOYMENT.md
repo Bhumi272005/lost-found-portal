@@ -1,93 +1,84 @@
-# Lost & Found Portal - Streamlit Deployment Guide
+# Deployment Guide for Lost and Found Portal
 
-## Streamlit Cloud Deployment
+## Making Image URLs Globally Shareable
 
-### Prerequisites
-1. A running backend API (FastAPI) deployed on Heroku, Railway, or similar platform
-2. GitHub repository with your code
+### Step 1: Choose a Cloud Platform
 
-### Steps to Deploy on Streamlit Cloud
+#### Option A: Railway (Recommended)
+1. Go to [railway.app](https://railway.app)
+2. Connect your GitHub account
+3. Click "New Project" → "Deploy from GitHub repo"
+4. Select your repository
 
-1. **Push your code to GitHub** including the new `streamlit_app.py` file
+#### Option B: Render
+1. Go to [render.com](https://render.com)
+2. Connect your GitHub account
+3. Click "New" → "Web Service"
+4. Select your repository
 
-2. **Go to [Streamlit Cloud](https://streamlit.io/cloud)**
+#### Option C: Heroku
+1. Go to [heroku.com](https://heroku.com)
+2. Create new app
+3. Connect to GitHub repository
 
-3. **Connect your GitHub repository**
+### Step 2: Set Up MongoDB Atlas (Cloud Database)
 
-4. **Set the main file path to**: `streamlit_app.py`
-
-5. **Configure Secrets** in Streamlit Cloud dashboard:
-   ```toml
-   API_URL = "https://your-backend-api-url.herokuapp.com"
-   ADMIN_PASSWORD = "your-secure-admin-password"
+1. Go to [mongodb.com/atlas](https://mongodb.com/atlas)
+2. Create free cluster
+3. Get connection string like:
+   ```
+   mongodb+srv://username:password@cluster.mongodb.net/lost_and_found
    ```
 
-6. **Deploy!**
+### Step 3: Configure Environment Variables
 
-### Troubleshooting Common Issues
+Set these in your cloud platform:
 
-#### 1. **Requirements Installation Error**
-- Make sure your `requirements.txt` only contains frontend dependencies
-- Remove backend-specific packages like `fastapi`, `uvicorn`, `pymongo`, etc.
+```bash
+# MongoDB
+MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/lost_and_found?retryWrites=true&w=majority
+DATABASE_NAME=lost_and_found
 
-#### 2. **Module Import Errors**
-- Ensure all imports in `streamlit_app.py` are available in requirements.txt
-- Check that there are no relative imports to backend modules
+# Base URL (your deployed app URL)
+BASE_URL=https://your-app-name.railway.app
 
-#### 3. **API Connection Issues**
-- Verify your backend API is deployed and accessible
-- Check that the API_URL in secrets matches your backend URL
-- Ensure CORS is properly configured in your backend
+# Gemini AI
+GEMINI_API_KEY=your-gemini-api-key
 
-#### 4. **Python Version Issues**
-- Streamlit Cloud uses Python 3.9+ by default
-- Make sure all packages in requirements.txt are compatible
-
-### Backend Deployment (FastAPI)
-
-Your backend needs to be deployed separately. Recommended platforms:
-
-1. **Heroku** - Easy deployment with free tier
-2. **Railway** - Modern alternative to Heroku
-3. **DigitalOcean App Platform** - Good performance
-4. **AWS/Google Cloud** - More advanced options
-
-### Environment Variables for Backend
-
-When deploying your backend, make sure to set:
-- `MONGODB_URL` - Your MongoDB connection string
-- `GEMINI_API_KEY` - Your Google Gemini API key
-- Any other environment variables your backend needs
-
-### File Structure After Updates
-
-```
-lost-found-portal/
-├── streamlit_app.py          # Main Streamlit app (NEW)
-├── requirements.txt          # Updated for frontend only
-├── .streamlit/
-│   └── config.toml          # Streamlit configuration
-├── secrets.toml.template    # Template for secrets
-├── frontend/
-│   └── app.py              # Original frontend (keep for reference)
-├── backend/                # Backend files (deploy separately)
-│   ├── main.py
-│   ├── model.py
-│   └── ...
-└── README.md               # This file
+# Optional: CORS
+ALLOWED_ORIGINS=*
 ```
 
-### Next Steps
+### Step 4: Deploy
 
-1. Deploy your backend API first
-2. Update the API_URL in Streamlit secrets
-3. Test the deployment
-4. Configure custom domain (optional)
+1. Push your code to GitHub
+2. Your cloud platform will automatically deploy
+3. Get your app URL (e.g., `https://your-app.railway.app`)
 
-### Support
+### Step 5: Update BASE_URL
 
-If you encounter issues:
-1. Check Streamlit Cloud logs
-2. Verify backend API is running
-3. Test API endpoints manually
-4. Check browser console for errors
+After deployment, update the `BASE_URL` environment variable to your actual deployed URL.
+
+### Result
+
+Your image URLs will now look like:
+```
+https://your-app.railway.app/images/64f7b8c9e4b0a1b2c3d4e5f6
+```
+
+These URLs will be accessible from **anywhere in the world**! 🌍
+
+### Testing
+
+1. Deploy your app
+2. Create a test item with image
+3. Check MongoDB - the `image_url` field should contain your global URL
+4. Test the URL from any device/location
+
+## Files Created/Modified
+
+- `Dockerfile` - Container configuration
+- `railway.json` - Railway deployment config  
+- `.env.production` - Production environment template
+- Updated `mongodb.py` - Better BASE_URL handling
+- Updated `main.py` - Environment configuration

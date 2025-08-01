@@ -12,6 +12,10 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# For production, also try to load .env.production
+if os.path.exists(".env.production"):
+    load_dotenv(".env.production", override=True)
+
 # Add current directory to Python path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -84,7 +88,7 @@ except Exception as e:
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=os.getenv("ALLOWED_ORIGINS", "*").split(",") if os.getenv("ALLOWED_ORIGINS") != "*" else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
