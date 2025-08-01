@@ -1,8 +1,9 @@
-# Exclude Streamlit and frontend files from Railway deployment
-frontend-streamlit/
-.streamlit/
-streamlit_app.py
-secrets.toml.template
+# Exclude backend files when deploying Streamlit frontend
+backend/
+test_simple.py
+requirements-backend.txt
+mongod.conf
+check_image_urls.py
 
 # Exclude development files
 .env
