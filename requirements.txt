@@ -31,3 +31,6 @@ numpy>=1.21.0
 
 # Additional backend dependencies
 python-multipart>=0.0.6
+
+# Additional MongoDB/BSON support
+dnspython>=2.4.0
