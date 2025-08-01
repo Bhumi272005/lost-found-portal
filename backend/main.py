@@ -78,14 +78,14 @@ def temporary_image_file(image_data: bytes, file_id: str):
 # Remove static files mount since we're using GridFS
 # Images will be served through API endpoints
 
-# Initialize MongoDB database
+# Initialize MongoDB database (non-blocking)
 try:
     db.init_db()
     print("✅ MongoDB initialized successfully")
 except Exception as e:
-    print(f"❌ MongoDB initialization error: {e}")
-    print("💡 Please ensure MongoDB is running or configure MongoDB Atlas")
-    raise e
+    print(f"⚠️ MongoDB initialization warning: {e}")
+    print("💡 App will start without database - configure MongoDB Atlas or local MongoDB")
+    # Don't raise exception - let app start without database
 
 app.add_middleware(
     CORSMiddleware,
@@ -106,6 +106,11 @@ async def report_item(
     file: UploadFile = None
 ):
     try:
+        # Check if database is available
+        mongo_db = db.get_mongodb()
+        if mongo_db.client is None:
+            raise HTTPException(status_code=503, detail="Database not available. Please check MongoDB connection.")
+        
         image_file_id = None
         category = "Uncategorized"
 
@@ -161,6 +166,11 @@ async def get_image(file_id: str):
 @app.get("/items/")
 def get_items():
     try:
+        # Check if database is available
+        mongo_db = db.get_mongodb()
+        if mongo_db.client is None:
+            raise HTTPException(status_code=503, detail="Database not available. Please check MongoDB connection.")
+        
         items = db.fetch_all_items()
         return {"items": items, "count": len(items)}
     except Exception as e:
@@ -194,7 +204,18 @@ def search_items(q: str = "", status: str = "All"):
 
 @app.get("/")
 def read_root():
-    return {"message": "Lost and Found API is running"}
+    """Root endpoint to verify API is running"""
+    return {
+        "message": "Lost and Found API is running",
+        "status": "online",
+        "version": "1.0.0",
+        "endpoints": {
+            "health": "/health",
+            "items": "/items/",
+            "search": "/search/",
+            "report": "/report/"
+        }
+    }
 
 @app.get("/health")
 def health_check():
@@ -214,9 +235,13 @@ def health_check():
 def full_health_check():
     """Comprehensive health check including database connectivity"""
     try:
-        # Test database connection
-        db.client.admin.command('ping')
-        database_status = "connected"
+        # Test database connection safely
+        mongo_db = db.get_mongodb()
+        if mongo_db.client is not None:
+            mongo_db.client.admin.command('ping')
+            database_status = "connected"
+        else:
+            database_status = "not_initialized"
     except Exception as e:
         database_status = f"error: {str(e)}"
     
