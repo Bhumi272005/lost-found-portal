@@ -1,2 +1,2 @@
-web: python -c "import os; print(f'🚀 Railway PORT: {os.getenv(\"PORT\", \"8501\")}')" && streamlit run frontend-streamlit/streamlit_app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true --server.enableCORS false --server.enableXsrfProtection false
-release: echo "Deploying Streamlit Frontend"
+web: uvicorn backend.main:app --host 0.0.0.0 --port $PORT --log-level info
+release: echo "Deploying FastAPI Backend Only"

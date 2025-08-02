@@ -1,5 +1,5 @@
-# Backend-only dependencies for Railway deployment
-# FastAPI Backend Requirements
+# Backend Requirements - FastAPI, Database, AI
+# Core backend dependencies for Lost & Found Portal API
 
 # Backend Framework
 fastapi>=0.104.1
@@ -9,23 +9,23 @@ uvicorn[standard]>=0.24.0
 pymongo>=4.6.0
 dnspython>=2.4.0
 
-# AI/ML
+# AI/ML for image classification
 google-generativeai>=0.3.0
-
-# HTTP Client for API calls
-requests>=2.31.0
 
 # Image Processing
 pillow>=9.0.0
 
-# Date/Time handling
-pytz>=2023.3
+# HTTP Client
+requests>=2.31.0
+
+# File uploads
+python-multipart>=0.0.6
 
 # Environment Configuration
 python-dotenv>=1.0.0
 
+# Date/Time handling
+pytz>=2023.3
+
 # Data handling
 numpy>=1.21.0
-
-# Additional backend dependencies
-python-multipart>=0.0.6
