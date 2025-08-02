@@ -1,19 +1,22 @@
-# BACKEND ONLY DEPLOYMENT
-# Railway will deploy ONLY the FastAPI backend
-
-# Exclude frontend files (for separate Streamlit deployment)
-frontend/
+# Exclude Streamlit and frontend files from Railway deployment
+frontend-streamlit/
+.streamlit/
+streamlit_app.py
+secrets.toml.template
 
 # Exclude development files
 .env
+.env.example
+.env.production
 .venv/
 __pycache__/
 *.pyc
-
-# Exclude git and IDE files
-.git/
-.github/
-.vscode/
+.pytest_cache/
 
 # Exclude documentation
 README.md
+DEPLOYMENT.md
+
+# Exclude local database
+*.db
+*.sqlite

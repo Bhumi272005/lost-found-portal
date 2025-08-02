@@ -1,16 +1,16 @@
-# Lost & Found Portal
+# Lost & Found Portal - Backend API
 
-A web-based Lost & Found portal with FastAPI backend and Streamlit frontend, powered by **MongoDB with GridFS** for cross-computer image sharing.
+A FastAPI-based Lost & Found portal backend API, powered by **MongoDB with GridFS** for image storage and sharing.
 
 ## 🎯 Key Features
 
-- 📝 Report lost/found items with image upload
+- 📝 REST API for lost/found items with image upload
 - 🔍 Search functionality with text search
 - 🏷️ AI-powered image classification using Google Gemini
-- ⚙️ Admin panel for item management
+- ⚙️ Admin API endpoints for item management
 - 🌐 **Multi-computer access** - Images stored in MongoDB GridFS
-- 📱 Mobile-friendly interface
-- 🖼️ **Shared image storage** - All computers can see the same images
+- 🖼️ **Shared image storage** - Centralized image storage
+- 🚀 **Railway-ready deployment**
 
 ## Prerequisites
 
