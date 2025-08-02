@@ -1,0 +1,20 @@
+# Frontend Requirements - Streamlit UI
+# Frontend dependencies for Lost & Found Portal Web Interface
+
+# Frontend Framework
+streamlit>=1.28.1
+
+# HTTP Client for API calls
+requests>=2.31.0
+
+# Image Processing and Display
+pillow>=9.0.0
+
+# Date/Time handling
+pytz>=2023.3
+
+# Environment Configuration (for Streamlit secrets)
+python-dotenv>=1.0.0
+
+# Data handling for UI
+numpy>=1.21.0
