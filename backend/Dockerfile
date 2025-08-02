@@ -16,17 +16,17 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Copy backend requirements and install
-COPY backend/requirements.txt ./requirements.txt
+COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy ONLY backend files (not frontend)
-COPY backend/ ./backend/
+COPY backend/ ./
 
 # Verify FastAPI is accessible by creating a simple test
-RUN python -c "from backend.main import app; print('✅ FastAPI app imported successfully')"
+RUN python -c "from main import app; print('✅ FastAPI app imported successfully')"
 
 # Expose the port (Railway will override with $PORT)
 EXPOSE $PORT
 
 # Start FastAPI backend using environment variables
-CMD uvicorn backend.main:app --host $HOST --port $PORT --log-level $LOG_LEVEL --workers $WORKERS
+CMD uvicorn main:app --host $HOST --port $PORT --log-level $LOG_LEVEL --workers $WORKERS
