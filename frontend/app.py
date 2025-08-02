@@ -6,14 +6,8 @@ import datetime
 import pytz
 import os
 
-# Get API URL from environment, Streamlit secrets, or use default
-API_URL = os.getenv("API_URL")
-if not API_URL:
-    # Try Streamlit secrets for deployed apps
-    try:
-        API_URL = st.secrets["API_URL"]
-    except:
-        API_URL = "http://localhost:8000"  # Local development fallback
+# Get API URL from environment or use default
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 def get_image_url(image_file_id):
     """Convert GridFS file ID to API URL"""
