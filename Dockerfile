@@ -10,13 +10,8 @@ COPY requirements.txt .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY main.py .
-COPY mongodb.py .
-COPY model.py .
-COPY gemini_api.py .
-COPY image_utils.py .
-COPY .env.production .
+# Copy all Python files
+COPY *.py .
 
 # Create a non-root user
 RUN useradd --create-home --shell /bin/bash app
