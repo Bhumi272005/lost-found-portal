@@ -151,6 +151,11 @@ class MongoDB:
             
             for doc in cursor:
                 # Convert MongoDB document to tuple format similar to SQLite
+                # Generate image URL if we have a file ID but no stored URL
+                image_url = doc.get("image_url")
+                if not image_url and doc.get("image_file_id"):
+                    image_url = self.generate_image_url(doc.get("image_file_id"))
+                
                 item_tuple = (
                     str(doc["_id"]),  # id
                     doc.get("title", ""),
@@ -160,7 +165,7 @@ class MongoDB:
                     doc.get("status", ""),
                     doc.get("name", ""),
                     doc.get("contact", ""),
-                    doc.get("image_file_id", ""),  # GridFS file ID instead of path
+                    image_url or "",  # Use shareable image URL
                     self.format_ist_timestamp(doc.get("timestamp", ""))
                 )
                 items.append(item_tuple)

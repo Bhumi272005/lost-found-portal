@@ -16,6 +16,28 @@
 			"group": "build",
 			"isBackground": true,
 			"problemMatcher": []
+		},
+		{
+			"label": "Start Lost and Found API Server (Network Mode)",
+			"type": "shell",
+			"command": "C:\\Users\\hp\\OneDrive\\Desktop\\lost and found\\.venv\\Scripts\\uvicorn.exe",
+			"args": [
+				"backend.main:app",
+				"--host",
+				"0.0.0.0",
+				"--port",
+				"8000",
+				"--reload"
+			],
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [],
+			"options": {
+				"env": {
+					"BASE_URL": "http://192.168.0.107:8000",
+					"ALLOWED_ORIGINS": "*"
+				}
+			}
 		}
 	]
 }

@@ -1,132 +1,158 @@
-# Lost & Found Portal - Full Stack Application
+# 🔍 Lost & Found Portal
 
-A complete Lost & Found portal with **FastAPI backend** and **Streamlit frontend**, powered by **MongoDB with GridFS** for cross-computer image sharing.
+A modern web application to help people find and report lost items with AI-powered image classification.
 
-## 🎯 Key Features
+## 🌍 Live Demo
+- **Frontend**: https://your-app.streamlit.app (Deploy to get URL)
+- **Backend API**: https://your-project.up.railway.app (Deploy to get URL)
 
-- 📝 Report lost/found items with image upload
-- 🔍 Search functionality with text search  
-- 🏷️ AI-powered image classification using Google Gemini
-- ⚙️ Admin panel for item management
-- 🌐 **Multi-computer access** - Images stored in MongoDB GridFS
-- 📱 Mobile-friendly Streamlit interface
-- 🖼️ **Shared image storage** - All computers can see the same images
-- 🚀 **Dual deployment options** - Backend API + Frontend UI
+## ✨ Features
+- 📝 Report lost/found items with photos
+- 🔍 Search items by keywords and categories  
+- 🤖 AI-powered image classification using Google Gemini
+- 📱 Mobile-friendly responsive design
+- 🌐 Global image URL sharing
+- ☁️ Cloud-based storage and deployment
+
+## 🏗️ Architecture
+- **Frontend**: Streamlit (deployed on Streamlit Cloud)
+- **Backend**: FastAPI (deployed on Railway)
+- **Database**: MongoDB Atlas (cloud)
+- **Image Storage**: GridFS with global CDN
+- **AI**: Google Gemini API for image classification
 
 ## 📁 Project Structure
-
-- `backend/` - FastAPI REST API server
-- `frontend/` - Streamlit web application  
-- `Dockerfile` - Backend deployment
-- `Dockerfile.frontend` - Frontend deployment
-
-## Prerequisites
-
-**MongoDB is required** - Choose one option:
-
-### Option 1: Local MongoDB
-1. Install MongoDB Community Edition from https://www.mongodb.com/try/download/community
-2. Create data directory: `mkdir data\db`
-3. Start MongoDB: `mongod --dbpath data\db`
-
-### Option 2: MongoDB Atlas (Cloud - Recommended)
-1. Create free account at https://cloud.mongodb.com/
-2. Create cluster and get connection string
-3. Update `.env` file with your connection string
-
-## Quick Start
-
-### 1. Install Dependencies
-```bash
-.venv\Scripts\pip.exe install -r requirements.txt
 ```
-
-### 2. Setup Environment
-Update `.env` file:
-```
-MONGO_URL=mongodb://localhost:27017/  # or your Atlas connection string
-DATABASE_NAME=lost_and_found
-GEMINI_API_KEY=your_api_key_here      # Optional
-```
-
-### 3. Test MongoDB Connection
-```bash
-.venv\Scripts\python.exe setup_mongodb.py
-```
-
-### 4. Start Application
-
-**Option A - Use VS Code Task (Recommended):**
-- Press `Ctrl+Shift+P`
-- Run "Tasks: Run Task"
-- Select "Start Lost and Found API Server"
-- Open http://localhost:8501 for frontend
-
-**Option B - Manual Start:**
-```bash
-# Terminal 1 - Backend
-.venv\Scripts\uvicorn.exe backend.main:app --host 0.0.0.0 --port 8000 --reload
-
-# Terminal 2 - Frontend  
-.venv\Scripts\streamlit.exe run frontend\app.py
-```
-
-**Option C - Simple Script:**
-```bash
-.venv\Scripts\python.exe run.py
-```
-Frontend runs on: http://localhost:8501
-
-## Configuration
-
-Copy `.env.example` to `.env` and configure:
-
-### For Local MongoDB:
-```
-MONGO_URL=mongodb://localhost:27017/
-DATABASE_NAME=lost_and_found
-```
-
-### For MongoDB Atlas:
-```
-MONGO_URL=mongodb+srv://username:password@cluster.mongodb.net/
-DATABASE_NAME=lost_and_found
-```
-
-## Network Access
-
-To access from other computers:
-1. Find your IP: `ipconfig`
-2. Allow port 8000 in Windows Firewall
-3. Access via: `http://YOUR_IP:8000`
-
-## Project Structure
-```
-├── backend/           # FastAPI backend
-│   ├── main.py       # API server
-│   ├── mongodb.py    # MongoDB database
-│   └── ...
-├── frontend/         # Streamlit frontend
-│   └── app.py        # Web interface
-├── images/           # Uploaded images
-├── setup_mongodb.py  # MongoDB setup helper
-└── requirements.txt  # Dependencies
-```
-
-## Project Structure
-```
-lost-and-found/
-├── backend/
-│   ├── main.py           # FastAPI application
-│   ├── db.py            # Database operations with IST support
-│   ├── model.py         # Pydantic models
+lost-found-portal/
+├── 📂 backend/           # FastAPI Backend
+│   ├── main.py          # FastAPI application
+│   ├── mongodb.py       # Database connection & operations
+│   ├── model.py         # Data models
 │   ├── gemini_api.py    # AI image classification
-│   └── image_utils.py   # Image processing utilities
-├── frontend/
-│   └── app.py           # Streamlit application
-├── images/              # Uploaded images storage
-├── database.db          # SQLite database
-├── requirements.txt     # Python dependencies
-├── run_frontend.py      # Frontend runner script
-└── README.md           # This documentation
+│   ├── image_utils.py   # Image processing utilities
+│   └── requirements.txt # Python dependencies
+├── 📂 frontend/         # Streamlit Frontend
+│   ├── .streamlit/
+│   │   └── secrets.toml # Configuration secrets
+│   ├── main_app.py     # Main Streamlit application
+│   └── requirements.txt # Frontend dependencies
+├── 📄 Procfile         # Railway deployment config
+├── 📄 railway.json     # Railway settings
+├── 📄 runtime.txt      # Python version
+├── 📄 .env.production  # Production environment template
+└── 📄 README.md        # This file
 ```
+
+## 🚀 Quick Deploy
+
+### 1. Setup MongoDB Atlas
+1. Go to [mongodb.com/atlas](https://mongodb.com/atlas)
+2. Create a free M0 cluster
+3. Create database user and get connection string
+
+### 2. Deploy Backend (Railway)
+1. Go to [railway.app](https://railway.app)
+2. Connect this GitHub repository
+3. Add environment variables:
+   ```env
+   MONGO_URL=mongodb+srv://user:pass@cluster.mongodb.net/
+   DATABASE_NAME=lost_and_found
+   BASE_URL=https://your-project.up.railway.app
+   ALLOWED_ORIGINS=https://your-app.streamlit.app
+   ```
+
+### 3. Deploy Frontend (Streamlit Cloud)
+1. Go to [share.streamlit.io](https://share.streamlit.io)
+2. Connect this GitHub repository
+3. Set main file: `frontend/main_app.py`
+4. Add secrets:
+   ```toml
+   [api]
+   API_URL = "https://your-railway-project.up.railway.app"
+   ```
+
+## 🛠️ Local Development
+
+### Backend Setup
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Frontend Setup
+```bash
+cd frontend  
+pip install -r requirements.txt
+streamlit run main_app.py
+```
+
+## 🔧 Environment Variables
+
+### Backend (.env.production)
+```env
+MONGO_URL=mongodb+srv://...
+DATABASE_NAME=lost_and_found
+BASE_URL=https://your-project.up.railway.app
+ALLOWED_ORIGINS=https://your-app.streamlit.app
+GEMINI_API_KEY=your_api_key_here  # Optional for AI features
+```
+
+### Frontend (secrets.toml)
+```toml
+[api]
+API_URL = "https://your-railway-project.up.railway.app"
+```
+
+## 📱 API Endpoints
+
+- `GET /health` - Health check
+- `GET /items/` - Get all items
+- `POST /report/` - Report new item (with file upload)
+- `GET /search/` - Search items by query
+- `GET /images/{file_id}` - Serve images from GridFS
+- `POST /search/visual/` - Visual similarity search
+- `GET /docs` - Interactive API documentation
+
+## 🌟 Key Features
+
+### Global Image Sharing
+Images are served via Railway's global CDN, making URLs accessible worldwide:
+```
+https://your-project.up.railway.app/images/abc123def456
+```
+
+### AI Classification
+Automatic item categorization using Google Gemini Vision API for uploaded images.
+
+### Real-time Search
+Full-text search across item titles, descriptions, and categories.
+
+### Mobile Responsive
+Works seamlessly on desktop, tablet, and mobile devices.
+
+## 🔒 Security Features
+- HTTPS everywhere
+- CORS protection
+- Environment-based secrets
+- Secure database authentication
+- Input validation and sanitization
+
+## 💰 Cost
+- **MongoDB Atlas M0**: FREE (512MB)
+- **Railway**: FREE tier (500 hours/month)
+- **Streamlit Cloud**: FREE (unlimited public apps)
+- **Total**: $0/month for personal use
+
+## 🤝 Contributing
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📄 License
+MIT License - see LICENSE file for details
+
+---
+
+Built with ❤️ using Python, FastAPI, Streamlit, and MongoDB
