@@ -114,7 +114,7 @@ except Exception as e:
 @app.post("/report/")
 async def report_item(
     title: str = Form(...),
-    description: str = Form(...),
+    description: str = Form(""),  # Make description optional with empty string default
     location: str = Form(...),
     status: str = Form(...),
     name: str = Form("Anonymous"),

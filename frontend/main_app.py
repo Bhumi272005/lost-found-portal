@@ -17,17 +17,33 @@ st.set_page_config(
 # Get API URL from environment or use default
 # For local development, use localhost. For production, use Railway URL
 try:
-    # Try to get from Streamlit secrets first (for Streamlit Cloud deployment)
-    API_URL = st.secrets.get("api", {}).get("API_URL", "")
+    # Try multiple ways to get the API URL from Streamlit secrets
+    API_URL = ""
+    
+    # Method 1: Nested format [api] section
+    try:
+        API_URL = st.secrets.get("api", {}).get("API_URL", "")
+    except:
+        pass
+    
+    # Method 2: Flat format (direct key)
     if not API_URL:
-        # Fallback to environment variable
+        try:
+            API_URL = st.secrets.get("API_URL", "")
+        except:
+            pass
+    
+    # Method 3: Environment variable fallback
+    if not API_URL:
         API_URL = os.getenv("API_URL", "")
+    
+    # Method 4: Default for local development
     if not API_URL:
-        # Default for local development
         API_URL = "http://localhost:8000"
-except:
-    # Fallback if secrets not available
-    API_URL = os.getenv("API_URL", "http://localhost:8000")
+        
+except Exception as e:
+    # Final fallback if secrets not available
+    API_URL = "http://localhost:8000"
 
 def get_image_url(image_file_id):
     """Convert GridFS file ID to API URL"""
@@ -65,17 +81,35 @@ def main():
     # Show connection status
     with st.sidebar:
         st.write("🔗 **API Connection**")
+        st.write(f"**Current URL**: `{API_URL}`")
+        
         if "localhost" in API_URL:
-            st.write(f"🏠 Local: `{API_URL}`")
+            st.write("🏠 **Mode**: Local Development")
+            st.warning("⚠️ Using localhost - this won't work in Streamlit Cloud")
         else:
-            st.write(f"☁️ Cloud: `{API_URL}`")
+            st.write("☁️ **Mode**: Production")
+        
+        # Show debug info
+        with st.expander("🔍 Debug Info"):
+            try:
+                st.write("**Secrets available:**")
+                if hasattr(st, 'secrets'):
+                    secrets_keys = list(st.secrets.keys()) if st.secrets else []
+                    st.write(f"Keys: {secrets_keys}")
+                else:
+                    st.write("No secrets available")
+            except Exception as e:
+                st.write(f"Secrets error: {e}")
         
         # Check API health
         if check_api_health():
             st.success("✅ API Connected")
         else:
             st.error("❌ API Disconnected")
-            st.write("Make sure your backend is running")
+            st.write("**Troubleshooting:**")
+            st.write("1. Check Streamlit secrets")
+            st.write("2. Verify Railway is running")
+            st.write("3. Check CORS settings")
         
         st.write("---")
     
@@ -177,7 +211,7 @@ def report_item():
                 # Prepare form data
                 form_data = {
                     "title": title,
-                    "description": description,
+                    "description": description or "",  # Ensure description is never None
                     "category": category,
                     "location": location,
                     "status": status,

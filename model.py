@@ -3,7 +3,7 @@ from typing import Optional
 
 class ReportItem(BaseModel):
     title: str
-    description: str
+    description: Optional[str] = ""  # Make description optional with empty string default
     category: Optional[str] = "Uncategorized"
     location: str
     status: str  # "Lost" or "Found"
