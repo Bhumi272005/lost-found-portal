@@ -12,6 +12,19 @@ env/
 
 # Environment variables
 .env
+.env.local
+
+# Test and temporary files
+test-*.py
+test-*.ps1
+*.tmp
+*.temp
+
+# Documentation drafts
+*_DRAFT.md
+*_OLD.md
+CLEANUP_*.md
+DEPLOYMENT_*.md
 
 # Database files (SQLite - not used anymore)
 *.db
