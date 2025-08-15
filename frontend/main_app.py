@@ -84,11 +84,25 @@ def main():
     """, unsafe_allow_html=True)
     
     # Navigation with clean page selection
+    # Admin panel only visible to specific user
+    if st.session_state.get('show_admin', False):
+        page_options = ["🔍 Search Items", "📝 Report Item", "⚙️ Admin Panel"]
+    else:
+        page_options = ["🔍 Search Items", "📝 Report Item"]
+    
     page = st.selectbox(
         "Navigate to:",
-        ["🔍 Search Items", "📝 Report Item", "⚙️ Admin Panel"],
+        page_options,
         label_visibility="collapsed"
     )
+    
+    # Hidden admin access (type "admin" in the search box to enable)
+    if not st.session_state.get('show_admin', False):
+        # Check if user typed admin access code
+        admin_check = st.text_input("", placeholder="Search or type special code...", key="admin_check", label_visibility="collapsed")
+        if admin_check.lower() == "admin123":
+            st.session_state.show_admin = True
+            st.rerun()
     
     # Route to appropriate page
     if page == "🔍 Search Items":
@@ -346,9 +360,12 @@ def admin_page():
     """, unsafe_allow_html=True)
     
     # Logout button
-    if st.button("Logout", type="secondary"):
-        st.session_state.admin_authenticated = False
-        st.rerun()
+    col_logout1, col_logout2 = st.columns([3, 1])
+    with col_logout2:
+        if st.button("Hide Admin", type="secondary"):
+            st.session_state.show_admin = False
+            st.session_state.admin_authenticated = False
+            st.rerun()
     
     # Get statistics
     try:
