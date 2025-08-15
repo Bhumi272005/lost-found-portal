@@ -131,7 +131,7 @@ class MongoDB:
                 
                 # Use Gemini API to classify the image
                 try:
-                    from backend.gemini_api import classify_image_from_bytes
+                    from gemini_api import classify_image_from_bytes
                     ai_category = classify_image_from_bytes(image_data)
                     print(f"AI classified image as: {ai_category}")
                 except Exception as e:
@@ -283,7 +283,7 @@ class MongoDB:
     def search_by_image_url(self, image_url: str) -> List[Dict]:
         """Search for similar items using image URL and AI classification"""
         try:
-            from backend.gemini_api import classify_image_from_url
+            from gemini_api import classify_image_from_url
             
             # Classify the search image
             search_category = classify_image_from_url(image_url)

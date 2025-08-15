@@ -20,13 +20,9 @@ if os.path.exists(".env.production"):
 # Add current directory to Python path for imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-try:
-    from backend import mongodb as db, image_utils, gemini_api
-    from backend.model import ReportItem
-except ImportError:
-    # Fallback to local imports
-    import mongodb as db, image_utils, gemini_api
-    from model import ReportItem
+# Import modules - in Docker they will be in the same directory
+import mongodb as db, image_utils, gemini_api
+from model import ReportItem
 
 app = FastAPI(title="Lost and Found API", version="1.0.0")
 
@@ -350,7 +346,7 @@ def search_by_image_url(request: dict):
 def classify_image_endpoint(image_url: str):
     """Classify an image from URL using Gemini AI"""
     try:
-        from backend.gemini_api import classify_image_from_url
+        from gemini_api import classify_image_from_url
         
         if not image_url:
             raise HTTPException(status_code=400, detail="image_url parameter is required")
