@@ -80,8 +80,23 @@ class MongoDB:
         """Retrieve image from GridFS by file ID"""
         try:
             from bson import ObjectId
-            grid_out = self.fs.get(ObjectId(file_id))
+            from bson.errors import InvalidId
+            from gridfs.errors import NoFile
+            
+            # Validate ObjectId format
+            try:
+                object_id = ObjectId(file_id)
+            except InvalidId:
+                print(f"Invalid ObjectId format: {file_id}")
+                return None
+            
+            # Check if file exists and retrieve it
+            grid_out = self.fs.get(object_id)
             return grid_out.read()
+            
+        except NoFile:
+            print(f"No file found in GridFS with ID: {file_id}")
+            return None
         except Exception as e:
             print(f"Error retrieving image from GridFS: {e}")
             return None

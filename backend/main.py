@@ -169,14 +169,26 @@ async def report_item(
 
 @app.get("/images/{file_id}")
 async def get_image(file_id: str):
-    """Serve images from GridFS"""
+    """Serve images from GridFS with proper browser headers"""
     try:
         image_data = db.get_image(file_id)
         if image_data:
-            return StreamingResponse(io.BytesIO(image_data), media_type="image/jpeg")
+            # Create response with proper headers for browser compatibility
+            response = StreamingResponse(
+                io.BytesIO(image_data), 
+                media_type="image/jpeg",
+                headers={
+                    "Cache-Control": "public, max-age=3600",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "GET",
+                    "Access-Control-Allow-Headers": "*"
+                }
+            )
+            return response
         else:
             raise HTTPException(status_code=404, detail="Image not found")
     except Exception as e:
+        print(f"Error in get_image endpoint: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving image: {str(e)}")
 
 @app.get("/items/")
