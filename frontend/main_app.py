@@ -303,9 +303,8 @@ def report_page():
                     response = requests.post(f"{API_URL}/report/", data=form_data, files=files, timeout=30)
                     
                     if response.status_code == 200:
-                        st.success("Report submitted successfully!")
-                        st.info("Your item has been added to the database. Students can now search for it.")
-                        st.balloons()
+                        st.success("✅ Report submitted successfully!")
+                        st.toast("Item added to database!", icon="📋")
                     else:
                         st.error("Failed to submit report. Please try again.")
                         
