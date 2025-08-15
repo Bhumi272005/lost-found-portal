@@ -259,11 +259,11 @@ def report_page():
         with col4:
             contact = st.text_input("Contact Information *", placeholder="Phone number or email")
         
-        st.subheader("Upload Image (Optional)")
+        st.subheader("Upload Image *")
         image_file = st.file_uploader(
-            "Choose an image file", 
+            "Choose an image file *", 
             type=['png', 'jpg', 'jpeg'],
-            help="Upload a clear photo of the item to help with identification"
+            help="Upload a clear photo of the item (required for identification)"
         )
         
         # Submit button
@@ -281,6 +281,9 @@ def report_page():
                 return
             if not contact.strip():
                 st.error("Contact information is required")
+                return
+            if not image_file:
+                st.error("Please upload an image of the item")
                 return
             
             # Submit to API
