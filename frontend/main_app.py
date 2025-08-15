@@ -304,7 +304,6 @@ def report_page():
                     
                     if response.status_code == 200:
                         st.success("✅ Report submitted successfully!")
-                        st.toast("Item added to database!", icon="📋")
                     else:
                         st.error("Failed to submit report. Please try again.")
                         
