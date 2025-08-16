@@ -84,11 +84,7 @@ def main():
     """, unsafe_allow_html=True)
     
     # Navigation with clean page selection
-    # Admin panel only visible to specific user
-    if st.session_state.get('show_admin', False):
-        page_options = ["🔍 Search Items", "📝 Report Item", "⚙️ Admin Panel"]
-    else:
-        page_options = ["🔍 Search Items", "📝 Report Item"]
+    page_options = ["🔍 Search Items", "📝 Report Item"]
     
     page = st.selectbox(
         "Navigate to:",
@@ -96,21 +92,11 @@ def main():
         label_visibility="collapsed"
     )
     
-    # Hidden admin access (type "admin" in the search box to enable)
-    if not st.session_state.get('show_admin', False):
-        # Check if user typed admin access code
-        admin_check = st.text_input("", placeholder="Search or type special code...", key="admin_check", label_visibility="collapsed")
-        if admin_check.lower() == "admin123":
-            st.session_state.show_admin = True
-            st.rerun()
-    
     # Route to appropriate page
     if page == "🔍 Search Items":
         search_page()
     elif page == "📝 Report Item":
         report_page()
-    elif page == "⚙️ Admin Panel":
-        admin_page()
 
 def search_page():
     """Enhanced search page with semantic search"""
@@ -327,115 +313,7 @@ def report_page():
             except Exception as e:
                 st.error("Unable to submit report. Please check your connection and try again.")
 
-def admin_page():
-    """Admin panel for managing items"""
-    # Simple password protection
-    if 'admin_authenticated' not in st.session_state:
-        st.session_state.admin_authenticated = False
-    
-    if not st.session_state.admin_authenticated:
-        st.markdown("""
-        <div class="admin-header">
-            <p>Administrative access required</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        password = st.text_input("Enter admin password", type="password")
-        if st.button("Login"):
-            # Simple password check (in production, use proper authentication)
-            if password == "admin123":  # Change this password!
-                st.session_state.admin_authenticated = True
-                st.rerun()
-            else:
-                st.error("Invalid password")
-        
-        return
-    
-    # Admin dashboard
-    st.markdown("""
-    <div class="admin-header">
-        <h2>⚙️ Admin Dashboard</h2>
-        <p>Manage Lost & Found items</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Logout button
-    col_logout1, col_logout2 = st.columns([3, 1])
-    with col_logout2:
-        if st.button("Hide Admin", type="secondary"):
-            st.session_state.show_admin = False
-            st.session_state.admin_authenticated = False
-            st.rerun()
-    
-    # Get statistics
-    try:
-        response = requests.get(f"{API_URL}/items/", timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            items = data.get('items', [])
-            
-            # Statistics
-            total_items = len(items)
-            lost_items = len([item for item in items if len(item) > 4 and item[4] == "Lost"])
-            found_items = len([item for item in items if len(item) > 4 and item[4] == "Found"])
-            
-            # Display stats
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Total Items", total_items)
-            with col2:
-                st.metric("Lost Items", lost_items)
-            with col3:
-                st.metric("Found Items", found_items)
-            
-            st.markdown("---")
-            
-            # Items management
-            st.subheader("Manage Items")
-            
-            if not items:
-                st.info("No items in database")
-                return
-            
-            for i, item in enumerate(items):
-                if len(item) >= 9:
-                    item_id, title, description, category, location, status, name, contact, image_url, timestamp = item[:10]
-                    
-                    with st.expander(f"{status} - {title} (Posted: {timestamp[:10]})"):
-                        col_info, col_action = st.columns([3, 1])
-                        
-                        with col_info:
-                            st.write(f"**Category:** {category}")
-                            st.write(f"**Location:** {location}")
-                            if description:
-                                st.write(f"**Description:** {description}")
-                            st.write(f"**Contact:** {name} - {contact}")
-                            
-                            if image_url:
-                                try:
-                                    image_id = image_url.split('/')[-1] if '/images/' in image_url else image_url
-                                    st.image(f"{API_URL}/images/{image_id}", width=200)
-                                except:
-                                    st.write("Image unavailable")
-                        
-                        with col_action:
-                            if st.button(f"Delete", key=f"delete_{i}", type="secondary"):
-                                try:
-                                    # Call delete endpoint
-                                    delete_response = requests.delete(f"{API_URL}/items/{item_id}", timeout=10)
-                                    if delete_response.status_code == 200:
-                                        st.success("Item deleted successfully!")
-                                        st.rerun()  # Refresh the page
-                                    else:
-                                        st.error("Failed to delete item")
-                                except Exception as e:
-                                    st.error("Error deleting item")
-        
-        else:
-            st.error("Unable to load admin data")
-    
-    except Exception as e:
-        st.error("Admin service unavailable")
+
 
 if __name__ == "__main__":
     main()
